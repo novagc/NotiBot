@@ -11,5 +11,9 @@
     "license": "ISC",
     "dependencies": {
         "easyvk": "^2.5.1"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git://github.com/novagc/NotiBot.git"
     }
 }

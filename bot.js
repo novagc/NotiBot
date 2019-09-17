@@ -6,8 +6,8 @@ const help = [
     '+help — список команд',
     '+ntf  — подписаться на новостную рассылку',
     '-ntf  — отписаться от новостной рассылки'
-//    '+tt   — подписаться на рассылку расписания на следующий день',
-//    '-tt   — отписаться от рассылки расписания'
+    //    '+tt   — подписаться на рассылку расписания на следующий день',
+    //    '-tt   — отписаться от рассылки расписания'
 ].join('\n');
 
 var dataBase;
@@ -189,7 +189,8 @@ const lpSettings = {
 
 dataBase = new UserDB(settings);
 newPosts = {};
-
+console.log(settings);
+console.log(process.cwd());
 EasyVk({
     access_token: settings.token,
     utils: {
@@ -210,12 +211,12 @@ EasyVk({
         setInterval(() => {
             let ids = Object.getOwnPropertyNames(newPosts);
             let time = new Date();
-            ids.forEach((id) =>{
-                if(time - newPosts[id].time >= 1800000) {
+            ids.forEach((id) => {
+                if (time - newPosts[id].time >= 1800000) {
                     delete newPosts[id];
                     vkConnection.post('messages.send', {
-                        user_id : id,
-                        message : 'Время ожидания сообщения истекло'
+                        user_id: id,
+                        message: 'Время ожидания сообщения истекло'
                     }).catch((err) => console.log(err));
                 }
             })

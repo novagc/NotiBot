@@ -1,5 +1,5 @@
 {
     "token": "2b4097f7d905a2327ed16ab8f1a461029cdfbf98a28c782e8e7ae2be226789604ecc399e18d80b1d75d20",
-    "userPath": "./archive/users.db",
-    "adminPath": "./archive/admins.db"
+    "userPath": "/archive/users.db",
+    "adminPath": "/archive/admins.db"
 }

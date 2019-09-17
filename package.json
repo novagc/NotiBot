@@ -1,0 +1,15 @@
+{
+    "name": "NotiBot",
+    "version": "1.0.0",
+    "description": "Notification Bot for FEFU student's group",
+    "main": "bot.js",
+    "scripts": {
+        "start": "node bot.js"
+    },
+    "keywords": [],
+    "author": "novagc",
+    "license": "ISC",
+    "dependencies": {
+        "easyvk": "^2.5.1"
+    }
+}

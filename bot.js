@@ -14,8 +14,46 @@ var dataBase;
 var vkConnection;
 var botConnection;
 var newPosts;
+var clearTask;
+
+function Init() {
+    EasyVk({
+        access_token: settings.token,
+        utils: {
+            bots: true
+        }
+    }).then((vk) => {
+        vkConnection = vk;
+        vkConnection.bots.longpoll.connect(lpSettings).then(({ connection }) => {
+            botConnection = connection;
+
+            botConnection.on('message_new', (response) => SelectCommand(response.from_id, 'react', response.text, response.attachments));
+            botConnection.on('message_allow', (response) => SelectCommand(response.user_id, 'hello'));
+            botConnection.on('message_deny', (response) => dataBase.DeleteUser(response.user_id));
+            botConnection.on('group_leave', (response) => dataBase.DeleteUser(response.user_id));
+            botConnection.on('group_join', (response) => SelectCommand(response.user_id, 'hello'));
+            botConnection.on('wall_post_new', (response) => SelectCommand(null, 'news', response.text, response.attachments))
+
+            clearTask = setInterval(() => {
+                let ids = Object.getOwnPropertyNames(newPosts);
+                let time = new Date();
+                ids.forEach((id) => {
+                    if (time - newPosts[id].time >= 1800000) {
+                        delete newPosts[id];
+                        vkConnection.post('messages.send', {
+                            user_id: id,
+                            message: 'Время ожидания сообщения истекло'
+                        }).catch((err) => console.log(err));
+                    }
+                })
+            }, 60000);
+            console.log('Init');
+        });
+    });
+}
 
 function SelectCommand(userID, type, text, attachment) {
+    console.log(text);
     switch (type) {
         case 'hello':
             vkConnection.post('messages.send', {
@@ -189,37 +227,11 @@ const lpSettings = {
 
 dataBase = new UserDB(settings);
 newPosts = {};
-console.log(settings);
-console.log(process.cwd());
-EasyVk({
-    access_token: settings.token,
-    utils: {
-        bots: true
-    }
-}).then((vk) => {
-    vkConnection = vk;
-    vkConnection.bots.longpoll.connect(lpSettings).then(({ connection }) => {
-        botConnection = connection;
 
-        botConnection.on('message_new', (response) => SelectCommand(response.from_id, 'react', response.text, response.attachments));
-        botConnection.on('message_allow', (response) => SelectCommand(response.user_id, 'hello'));
-        botConnection.on('message_deny', (response) => dataBase.DeleteUser(response.user_id));
-        botConnection.on('group_leave', (response) => dataBase.DeleteUser(response.user_id));
-        botConnection.on('group_join', (response) => SelectCommand(response.user_id, 'hello'));
-        botConnection.on('wall_post_new', (response) => SelectCommand(null, 'news', response.text, response.attachments))
+setInterval(() => {
+    botConnection.close();
+    clearInterval(clearTask);
+    Init();
+}, 3600000);
 
-        setInterval(() => {
-            let ids = Object.getOwnPropertyNames(newPosts);
-            let time = new Date();
-            ids.forEach((id) => {
-                if (time - newPosts[id].time >= 1800000) {
-                    delete newPosts[id];
-                    vkConnection.post('messages.send', {
-                        user_id: id,
-                        message: 'Время ожидания сообщения истекло'
-                    }).catch((err) => console.log(err));
-                }
-            })
-        }, 60000);
-    });
-});
+Init();
